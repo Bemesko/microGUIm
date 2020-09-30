@@ -2,4 +2,9 @@ class SellerAgent(object):
     """
     docstring
     """
-    pass
+
+    def start_seller_auctions(self):
+        """
+        docstring
+        """
+        print("start_seller_auctions")
