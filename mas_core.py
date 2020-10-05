@@ -3,7 +3,7 @@ from buyer_agent import BuyerAgent
 from seller_agent import SellerAgent
 
 
-class MASCore():
+class MASCore(object):
     """
     docstring
     """

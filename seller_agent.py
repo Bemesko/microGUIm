@@ -8,3 +8,9 @@ class SellerAgent(object):
         docstring
         """
         print("start_seller_auctions")
+
+    def notify_buyer(self):
+        """
+        docstring
+        """
+        print("notify_buyer")
