@@ -3,7 +3,7 @@ import time
 
 from osbrain import Agent, run_agent, run_nameserver
 
-import AuctionSync
+from auction_sync import auction_sync
 import Prosumer
 
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     '''Setup Agentes'''
     ns = run_nameserver()
-    auctionSync = run_agent('auctionSync', base=AuctionSync.AuctionSync)
+    auction_sync = run_agent('auction_sync', base=auction_sync)
     for i in range(nAgents):
         agentName = 'prosumer' + str(i)
         prosumers.append(run_agent(agentName, base=Prosumer.Prosumer))
@@ -84,14 +84,15 @@ if __name__ == '__main__':
         addrAlias = 'requestSeller' + str(i)
         requestSellerAddr.append(prosumers[i].bind(
             'REP', alias=addrAlias, handler=answerSellRequest))
-        auctionSync.connect(requestSellerAddr[i], alias=addrAlias)
+        auction_sync.connect(requestSellerAddr[i], alias=addrAlias)
 
-    marketPriceAddr = auctionSync.bind('PUB', alias='marketPrices')
+    marketPriceAddr = auction_sync.bind('PUB', alias='marketPrices')
     for prosumer in prosumers:
         prosumer.connect(marketPriceAddr, handler=getMarketPrices)
 
     '''Script'''
-    auctionSync.each(5, AuctionSync.sendMarketPrices)
+    auction_sync.send_market_prices()
+    # Consertar
     time.sleep(1)
     for i in range(nAgents):
         prosumers[i].each(5, predictEnergy)
@@ -99,9 +100,9 @@ if __name__ == '__main__':
     for i in range(nAgents):
         prosumers[i].each(5, getBids)
     time.sleep(1)
-    auctionSync.each(5, AuctionSync.gatherSellers)
+    auction_sync.each(5, auction_sync.gatherSellers)
     time.sleep(1)
-    auctionSync.each(5, auction)
+    auction_sync.each(5, auction)
     ns.shutdown()
 
 """
