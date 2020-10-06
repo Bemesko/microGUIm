@@ -4,105 +4,43 @@ import time
 from osbrain import Agent, run_agent, run_nameserver
 
 from auction_sync import auction_sync
-import Prosumer
-
-
-def auction(agent):
-    print(str(agent.sellerAgents))
-
-
-def predictEnergy(agent):
-    agent.nextEnergyCon = random.randrange(1, 100)
-    agent.nextEnergyGen = random.randrange(1, 100)
-    agent.log_info('Energy Predicted to ' + str(agent.nextEnergyCon) +
-                   'Con, Gen' + str(agent.nextEnergyGen))
-
-
-def getBids(agent):
-    agent.energyDiff = agent.nextEnergyGen - agent.nextEnergyCon
-    if agent.energyDiff >= 0:
-        agent.isSeller = False
-        if(agent.buyParams['baseline'] == 'none'):
-            agent.wantedEnergy = 0
-        else:
-            if(agent.buyParams['baseline'] == 'deficit'):
-                agent.wantedEnergy = agent.energyDiff
-            elif(agent.buyParams['baseline'] == 'all'):
-                agent.wantedEnergy = agent.nextEnergyCon
-            elif(agent.buyParams['baseline'] == 'infinite'):
-                agent.wantedEnergy = 99999
-            agent.wantedEnergy = agent.wantedEnergy * \
-                agent.buyParams['energy'] / 100
-        agent.log_info('Will Buy' + str(agent.wantedEnergy))
-    else:
-        agent.isSeller = True
-        agent.energyDiff = agent.energyDiff * -1
-        if(agent.sellParams['baseline'] == 'none'):
-            agent.wantedEnergy = 0
-        else:
-            if(agent.sellParams['baseline'] == 'surplus'):
-                agent.wantedEnergy = agent.energyDiff
-            elif(agent.sellParams['baseline'] == 'all'):
-                agent.wantedEnergy = agent.nextEnergyGen
-            agent.wantedEnergy = agent.wantedEnergy * \
-                agent.sellParams['energy'] / 100
-        agent.log_info('Will Sell' + str(agent.wantedEnergy))
-
-
-def answerSellRequest(agent, message):
-    return agent.isSeller
-
-
-def getMarketPrices(agent, message):
-    agent.energyMarketPrice = int(message)
-    agent.energyBuyStartingPrice = agent.energyMarketPrice * \
-        agent.buyParams['starting_price'] / 100
-    agent.energyBuyIncrement = agent.energyMarketPrice * \
-        agent.buyParams['increment'] / 100
-    agent.energyBuyMaxPrice = agent.energyMarketPrice * \
-        agent.buyParams['max_price'] / 100
-    agent.energySellMinPrice = agent.energyMarketPrice * \
-        agent.sellParams['min_price'] / 100
-    agent.log_info('Price gathered! ' + str(agent.energyMarketPrice) + str(agent.energyBuyStartingPrice) +
-                   str(agent.energyBuyIncrement) + str(agent.energyBuyMaxPrice) + str(agent.energySellMinPrice))
-
+from prosumer import prosumer
 
 if __name__ == '__main__':
-    nAgents = int(input('How many agents?'))
+    agent_amount = int(input('How many agents?'))
     prosumers = []
 
     '''Setup Agentes'''
     ns = run_nameserver()
     auction_sync = run_agent('auction_sync', base=auction_sync)
-    for i in range(nAgents):
-        agentName = 'prosumer' + str(i)
-        prosumers.append(run_agent(agentName, base=Prosumer.Prosumer))
+    for i in range(agent_amount):
+        agent_name = 'prosumer' + str(i)
+        prosumers.append(run_agent(agent_name, base=prosumer))
 
     '''Setup Comunicações'''
-    requestSellerAddr = []
-    for i in range(nAgents):
+    requested_seller_addresses = []
+    for i in range(agent_amount):
         addrAlias = 'requestSeller' + str(i)
-        requestSellerAddr.append(prosumers[i].bind(
-            'REP', alias=addrAlias, handler=answerSellRequest))
-        auction_sync.connect(requestSellerAddr[i], alias=addrAlias)
+        requested_seller_addresses.append(prosumers[i].bind(
+            'REP', alias=addrAlias, handler=prosumer.answer_sell_request))
+        auction_sync.connect(requested_seller_addresses[i], alias=addrAlias)
 
     marketPriceAddr = auction_sync.bind('PUB', alias='marketPrices')
     for prosumer in prosumers:
-        prosumer.connect(marketPriceAddr, handler=getMarketPrices)
+        prosumer.connect(marketPriceAddr, handler=prosumer.get_market_prices)
 
     '''Script'''
     auction_sync.send_market_prices()
-    # Consertar
     time.sleep(1)
-    for i in range(nAgents):
-        prosumers[i].each(5, predictEnergy)
+    for i in range(agent_amount):
+        prosumers[i].each(5, prosumer.predict_energy)
     time.sleep(1)
-    for i in range(nAgents):
-        prosumers[i].each(5, getBids)
+    for curent_agent in range(agent_amount):
+        prosumers[current_agent].each(5, prosumer.get_bids)
     time.sleep(1)
-    auction_sync.each(5, auction_sync.gatherSellers)
+    auction_sync.gather_sellers()
     time.sleep(1)
-    auction_sync.each(5, auction)
+    auction_sync.auction()
     ns.shutdown()
 
 """

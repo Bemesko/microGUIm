@@ -9,8 +9,8 @@ class auction_sync(Agent):
     """
 
     def on_init(self):
-        self.current_market_prices = 0
-        self.seler_agents = []
+        self.__current_market_prices = 0
+        self.__seller_agents = []
 
     def send_market_prices(self):
         self.current_market_prices = random.randrange(1, 100)
@@ -28,3 +28,6 @@ class auction_sync(Agent):
                 self.seler_agents.append(i)
                 # print(str(agent.sellerAgents))
         self.log_info('Sellers Gathered!')
+
+    def auction(self):
+        print(str(self.__seller_agents))
