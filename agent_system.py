@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     '''Setup Agentes'''
     ns = run_nameserver()
-    auction_sync = run_agent('auction_sync', base=auction_sync)
+    auction_sync_agent = run_agent('auction_sync', base=auction_sync)
     for i in range(agent_amount):
         agent_name = 'prosumer' + str(i)
         prosumers.append(run_agent(agent_name, base=prosumer))
@@ -23,30 +23,31 @@ if __name__ == '__main__':
         addrAlias = 'requestSeller' + str(i)
         requested_seller_addresses.append(prosumers[i].bind(
             'REP', alias=addrAlias, handler=prosumer.answer_sell_request))
-        auction_sync.connect(requested_seller_addresses[i], alias=addrAlias)
+        auction_sync_agent.connect(
+            requested_seller_addresses[i], alias=addrAlias)
 
-    marketPriceAddr = auction_sync.bind('PUB', alias='marketPrices')
-    for prosumer in prosumers:
-        prosumer.connect(marketPriceAddr, handler=prosumer.get_market_prices)
+    marketPriceAddr = auction_sync_agent.bind('PUB', alias='marketPrices')
+    for new_prosumer in prosumers:
+        new_prosumer.connect(
+            marketPriceAddr, handler=prosumer.get_market_prices)
 
     '''Script'''
-    auction_sync.send_market_prices()
+    auction_sync_agent.send_market_prices()
     time.sleep(1)
-    for i in range(agent_amount):
-        prosumers[i].each(5, prosumer.predict_energy)
+    for current_agent in range(agent_amount):
+        prosumers[current_agent].each(5, prosumer.predict_energy)
     time.sleep(1)
-    for curent_agent in range(agent_amount):
+    for current_agent in range(agent_amount):
         prosumers[current_agent].each(5, prosumer.get_bids)
     time.sleep(1)
-    auction_sync.gather_sellers()
+    auction_sync_agent.each(5, auction_sync.gather_sellers)
     time.sleep(1)
-    auction_sync.auction()
+    auction_sync_agent.auction()
     ns.shutdown()
 
 """
-PRÓXIMOS PASSOS
-	Fazer sistema de leilões
-		Por enquanto apenas leilão inglês, porque é o mais fácil de fazer
+toDo
+Checar porquê as funções não funcionam
 
 PROBLEMAS
 
