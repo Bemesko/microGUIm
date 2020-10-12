@@ -1,0 +1,7 @@
+BASELINE = "baseline"
+ENERGY = "energy"
+MAX_PRICE = "max_price"
+START_PRICE = "starting_price"
+INCREMENT = "increment"
+MIN_PRICE = "min_price"
+MAX_LOT_SIZE = "max_lot_size_wh"
