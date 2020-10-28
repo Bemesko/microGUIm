@@ -1,7 +1,7 @@
 import random
 import time
-import constants
 import enum
+import constants
 
 from osbrain import Agent, run_agent, run_nameserver
 
@@ -34,15 +34,17 @@ class auction_sync(Agent):
             f"Market prices sent! Current price: {self.current_market_prices}")
 
     def gather_sellers(self, agent_number):
-        self.seller_agents = []
         address_alias = f"requestSeller{agent_number}"
         self.send(address_alias, 'Will you sell?')
         if self.recv(address_alias):
             self.seller_agents.append(agent_number)
-        self.log_info('Sellers Gathered!')
+        self.log_info("Sellers gathered!")
+
+    def reset_seller_list(self):
+        self.seller_agents = []
 
     def auction(self):
-        print(f"Sellers: {self.seller_agents}")
+        self.log_info(f"Started auction with {self.seller_agents}")
 
 
 class prosumer(Agent):
@@ -149,8 +151,10 @@ if __name__ == '__main__':
     '''Agent Setup'''
     # Setting up nameserver
     nameserver = run_nameserver()
+
     # Setting up auction sync
     auction_sync_agent = run_agent('auction_sync', base=auction_sync)
+
     # Setting up agents
     for i in range(agent_amount):
         agent_name = f"Prosumer{i}"
@@ -165,7 +169,6 @@ if __name__ == '__main__':
             'REP', alias=addrAlias, handler=prosumer.answer_sell_request))
         auction_sync_agent.connect(
             requested_seller_addresses[i], alias=addrAlias)
-    print(f"Requested sellers addresses: {requested_seller_addresses}")
 
     # Market price set up
     marketPriceAddr = auction_sync_agent.bind('PUB', alias='marketPrices')
@@ -182,6 +185,7 @@ if __name__ == '__main__':
     for current_agent in range(agent_amount):
         prosumers[current_agent].each(5, prosumer.get_bids)
     time.sleep(1)
+    auction_sync_agent.each(5, auction_sync.reset_seller_list)
     for i in range(agent_amount):
         auction_sync_agent.each(
             5, auction_sync.gather_sellers, i)
