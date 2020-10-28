@@ -145,8 +145,6 @@ class prosumer(Agent):
 
 
 if __name__ == '__main__':
-    agent_amount = int(input('How many agents?'))
-    prosumers = []
 
     '''Agent Setup'''
     # Setting up nameserver
@@ -155,7 +153,10 @@ if __name__ == '__main__':
     # Setting up auction sync
     auction_sync_agent = run_agent('auction_sync', base=auction_sync)
 
+    agent_amount = int(input('How many agents?'))
+
     # Setting up agents
+    prosumers = []
     for i in range(agent_amount):
         agent_name = f"Prosumer{i}"
         prosumers.append(run_agent(agent_name, base=prosumer))
