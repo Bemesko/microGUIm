@@ -144,8 +144,7 @@ class prosumer(Agent):
         return self.is_seller
 
 
-if __name__ == '__main__':
-
+def setup_multi_agent_system():
     '''Agent Setup'''
     # Setting up nameserver
     nameserver = run_nameserver()
@@ -153,8 +152,7 @@ if __name__ == '__main__':
     # Setting up auction sync
     auction_sync_agent = run_agent('auction_sync', base=auction_sync)
 
-    agent_amount = int(input('How many agents?'))
-
+    agent_amount = 5
     # Setting up agents
     prosumers = []
     for i in range(agent_amount):
@@ -176,7 +174,6 @@ if __name__ == '__main__':
     for new_prosumer in prosumers:
         new_prosumer.connect(
             marketPriceAddr, handler=prosumer.get_market_prices)
-
     '''Script'''
     auction_sync_agent.each(5, auction_sync.send_market_prices)
     time.sleep(1)
@@ -192,3 +189,7 @@ if __name__ == '__main__':
             5, auction_sync.gather_sellers, i)
     time.sleep(1)
     auction_sync_agent.each(5, auction_sync.auction)
+
+
+if __name__ == "__main__":
+    setup_multi_agent_system()
