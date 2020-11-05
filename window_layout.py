@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 import ioh_backend
 
@@ -8,6 +9,8 @@ class tkinterApp(tk.Tk):
 
     # __init__ function for class tkinterApp
     def __init__(self, *args, **kwargs):
+
+        self.mas = ioh_backend.MultiagentSystem()
 
         # __init__ function for class Tk
         tk.Tk.__init__(self, *args, **kwargs)
@@ -25,14 +28,15 @@ class tkinterApp(tk.Tk):
 
         self.button1 = tk.Button(self.top_frame, text="Energy Info",
                                  command=lambda: self.show_frame(PageOverview))
-        self.button1.grid(row=0, column=0)
+        self.button1.pack(side="left")
 
         self.button2 = tk.Button(self.top_frame, text="Agent Info",
                                  command=lambda: self.show_frame(PageAgentMainWindow))
-        self.button2.grid(row=0, column=1)
+        self.button2.pack(side="left")
+
         self.button3 = tk.Button(
-            self.top_frame, text="Start Agents", command=ioh_backend.setup_multi_agent_system())
-        self.button3.grid(row=0, column=2)
+            self.top_frame, text="Start Agents", command=self.mas.run_auction_script)
+        self.button3.pack(side="left")
 
         # initializing frames to an empty array
         self.frames = {}
@@ -53,11 +57,14 @@ class tkinterApp(tk.Tk):
         # tell which frame will be shown first
         self.show_frame(PageAgentMainWindow)
 
-    # to display the current frame passed as
-    # parameter
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame.tkraise()
+
+    def on_closing(self):
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.mas.shutdown()
+            self.destroy()
 
 
 """ General Info """
@@ -513,4 +520,6 @@ if __name__ == "__main__":
     app = tkinterApp()
     app.title("Agent Monitoring System")
     app.geometry("600x400")
+    app.protocol("WM_DELETE_WINDOW", app.on_closing)
+
     app.mainloop()

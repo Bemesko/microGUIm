@@ -3,23 +3,11 @@ import time
 import enum
 import constants
 
+
 from osbrain import Agent, run_agent, run_nameserver
 
 
-class buy_baseline(enum.Enum):
-    deficit = 0
-    all_energy = 1
-    infinite = 2
-    none = 3
-
-
-class sell_baseline(enum.Enum):
-    surplus = 0
-    all_energy = 1
-    none = 2
-
-
-class auction_sync(Agent):
+class AuctionSync(Agent):
 
     def on_init(self):
         self.current_market_prices = 0
@@ -47,7 +35,7 @@ class auction_sync(Agent):
         self.log_info(f"Started auction with {self.seller_agents}")
 
 
-class prosumer(Agent):
+class Prosumer(Agent):
     def on_init(self):
         self.next_energy_consumption = 0
         self.next_energy_generation = 0
@@ -64,14 +52,14 @@ class prosumer(Agent):
         self.energy_selling_min_price = 0
         self.energy_sold = False
         self.buy_parameters = {
-            constants.BASELINE: buy_baseline.deficit,
+            constants.BASELINE: constants.buy_baseline.deficit,
             constants.ENERGY: 80,
             constants.MAX_PRICE: 90,
             constants.START_PRICE: 30,
             constants.INCREMENT: 10,
         }
         self.sell_parameters = {
-            constants.BASELINE: sell_baseline.surplus,
+            constants.BASELINE: constants.sell_baseline.surplus,
             constants.ENERGY: 80,
             constants.MIN_PRICE: 110,
             constants.MAX_LOT_SIZE: 100
@@ -99,11 +87,11 @@ class prosumer(Agent):
         baseline = self.buy_parameters[constants.BASELINE]
         sell_energy = 0
 
-        if(baseline == buy_baseline.deficit):
+        if(baseline == constants.buy_baseline.deficit):
             sell_energy = self.energy_difference
-        elif(baseline == buy_baseline.all_energy):
+        elif(baseline == constants.buy_baseline.all_energy):
             sell_energy = self.next_energy_consumption
-        elif(baseline == buy_baseline.infinite):
+        elif(baseline == constants.buy_baseline.infinite):
             sell_energy = 99999
         else:
             sell_energy = 0
@@ -115,9 +103,9 @@ class prosumer(Agent):
         baseline = self.sell_parameters[constants.BASELINE]
         sell_energy = 0
 
-        if(baseline == sell_baseline.all_energy):
+        if(baseline == constants.sell_baseline.all_energy):
             sell_energy = self.next_energy_generation
-        elif(baseline == sell_baseline.surplus):
+        elif(baseline == constants.sell_baseline.surplus):
             sell_energy = self.energy_difference
         else:
             sell_energy = 0
@@ -144,52 +132,62 @@ class prosumer(Agent):
         return self.is_seller
 
 
-def setup_multi_agent_system():
-    '''Agent Setup'''
-    # Setting up nameserver
-    nameserver = run_nameserver()
+class MultiagentSystem():
 
-    # Setting up auction sync
-    auction_sync_agent = run_agent('auction_sync', base=auction_sync)
+    def __init__(self):
+        '''Agent Setup'''
+        # Setting up nameserver
+        self.nameserver = run_nameserver()
 
-    agent_amount = 5
-    # Setting up agents
-    prosumers = []
-    for i in range(agent_amount):
-        agent_name = f"Prosumer{i}"
-        prosumers.append(run_agent(agent_name, base=prosumer))
+        # Setting up auction sync
+        self.auction_sync_agent = run_agent('auction_sync', base=AuctionSync)
 
-    '''Communications Setup'''
-    # Sell request set up
-    requested_seller_addresses = []
-    for i in range(agent_amount):
-        addrAlias = f"requestSeller{i}"
-        requested_seller_addresses.append(prosumers[i].bind(
-            'REP', alias=addrAlias, handler=prosumer.answer_sell_request))
-        auction_sync_agent.connect(
-            requested_seller_addresses[i], alias=addrAlias)
+        # Setting up agents
+        self.agent_amount = 5
 
-    # Market price set up
-    marketPriceAddr = auction_sync_agent.bind('PUB', alias='marketPrices')
-    for new_prosumer in prosumers:
-        new_prosumer.connect(
-            marketPriceAddr, handler=prosumer.get_market_prices)
-    '''Script'''
-    auction_sync_agent.each(5, auction_sync.send_market_prices)
-    time.sleep(1)
-    for current_agent in range(agent_amount):
-        prosumers[current_agent].each(5, prosumer.predict_energy)
-    time.sleep(1)
-    for current_agent in range(agent_amount):
-        prosumers[current_agent].each(5, prosumer.get_bids)
-    time.sleep(1)
-    auction_sync_agent.each(5, auction_sync.reset_seller_list)
-    for i in range(agent_amount):
-        auction_sync_agent.each(
-            5, auction_sync.gather_sellers, i)
-    time.sleep(1)
-    auction_sync_agent.each(5, auction_sync.auction)
+        self.prosumers = []
+        for i in range(self.agent_amount):
+            agent_name = f"Prosumer{i}"
+            self.prosumers.append(run_agent(agent_name, base=Prosumer))
+
+        '''Communications Setup'''
+        # Sell request set up
+        requested_seller_addresses = []
+        for i in range(self.agent_amount):
+            addrAlias = f"requestSeller{i}"
+            requested_seller_addresses.append(self.prosumers[i].bind(
+                'REP', alias=addrAlias, handler=Prosumer.answer_sell_request))
+            self.auction_sync_agent.connect(
+                requested_seller_addresses[i], alias=addrAlias)
+
+        # Market price set up
+        marketPriceAddr = self.auction_sync_agent.bind(
+            'PUB', alias='marketPrices')
+        for new_prosumer in self.prosumers:
+            new_prosumer.connect(
+                marketPriceAddr, handler=Prosumer.get_market_prices)
+
+    def run_auction_script(self):
+        self.auction_sync_agent.each(5, AuctionSync.send_market_prices)
+        time.sleep(1)
+        for current_agent in range(self.agent_amount):
+            self.prosumers[current_agent].each(5, Prosumer.predict_energy)
+        time.sleep(1)
+        for current_agent in range(self.agent_amount):
+            self.prosumers[current_agent].each(5, Prosumer.get_bids)
+        time.sleep(1)
+        self.auction_sync_agent.each(5, AuctionSync.reset_seller_list)
+        for i in range(self.agent_amount):
+            self.auction_sync_agent.each(
+                5, AuctionSync.gather_sellers, i)
+        time.sleep(1)
+        self.auction_sync_agent.each(5, AuctionSync.auction)
+
+    def shutdown(self):
+        self.nameserver.shutdown()
 
 
 if __name__ == "__main__":
-    setup_multi_agent_system()
+    mas = MultiagentSystem()
+    mas.run_auction_script()
+    mas.shutdown()
