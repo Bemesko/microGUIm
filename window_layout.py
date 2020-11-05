@@ -7,72 +7,74 @@ import ioh_backend
 
 class tkinterApp(tk.Tk):
 
-    # __init__ function for class tkinterApp
     def __init__(self, *args, **kwargs):
 
         self.mas = ioh_backend.MultiagentSystem()
 
-        # __init__ function for class Tk
         tk.Tk.__init__(self, *args, **kwargs)
 
-        # creating a container
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both", expand=False)
+        self.setup_top_bar()
 
-        container.grid_rowconfigure(0, weight=0)
-        container.grid_rowconfigure(1, weight=1)
-        container.grid_columnconfigure(0, weight=1)
+        self.setup_frame_container()
 
-        self.top_frame = tk.Frame(container)
-        self.top_frame.grid(row=0, sticky="wne")
+    def setup_top_bar(self):
+        self.top_frame = tk.Frame(self)
+        self.top_frame.pack(side="top", fill="x")
 
-        self.button1 = tk.Button(self.top_frame, text="Energy Info",
-                                 command=lambda: self.show_frame(PageOverview))
-        self.button1.pack(side="left")
+        self.button_overview = tk.Button(self.top_frame, text="Energy Info",
+                                         command=lambda: self.show_frame(PageOverview))
+        self.button_overview.pack(side="left")
 
-        self.button2 = tk.Button(self.top_frame, text="Agent Info",
-                                 command=lambda: self.show_frame(PageAgentMainWindow))
-        self.button2.pack(side="left")
+        self.button_agent_window = tk.Button(self.top_frame, text="Agent Info",
+                                             command=lambda: self.show_frame(PageAgentMainWindow))
+        self.button_agent_window.pack(side="left")
 
-        self.button3 = tk.Button(
+        self.button_start_agents = tk.Button(
             self.top_frame, text="Start Agents", command=self.mas.run_auction_script)
-        self.button3.pack(side="left")
+        self.button_start_agents.pack(side="left")
 
-        # initializing frames to an empty array
+        self.button_stop_nameserver = tk.Button(
+            self.top_frame, text="Stop Nameserver", command=self.mas.shutdown)
+        self.button_stop_nameserver.pack(side="left")
+
+    def setup_frame_container(self):
+        self.container = tk.Frame(self)
+        self.container.pack(side="top", fill="both", expand=True)
+
         self.frames = {}
 
-        # iterating through a tuple consisting
-        # of the different page layouts
-        for F in (PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData):
+        for new_frame in (PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData):
 
-            frame = F(container, self)
+            frame = new_frame(self.container, self, self.mas)
 
-            # initializing frame of that object from
-            # startpage, page1, page2 respectively with
-            # for loop
-            self.frames[F] = frame
+            self.frames[new_frame] = frame
 
-            frame.grid(row=1, column=0, sticky="nsew", padx=15, pady=15)
+            frame.grid(row=1, column=0, sticky="nswe", padx=15, pady=15)
 
-        # tell which frame will be shown first
         self.show_frame(PageAgentMainWindow)
 
-    def show_frame(self, cont):
-        frame = self.frames[cont]
+    def show_frame(self, desired_frame):
+        frame = self.frames[desired_frame]
         frame.tkraise()
 
     def on_closing(self):
-        if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            self.mas.shutdown()
-            self.destroy()
+        if messagebox.askokcancel("Quit", "Are you sure you want to quit?"):
+            try:
+                self.mas.shutdown()
+            except:
+                pass
+            finally:
+                self.destroy()
 
 
-""" General Info """
+""" General Info 
+    Frames belonging to the General Info section are set up below:
+"""
 
 
 class PageOverview(tk.Frame):
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, multiagent_system):
         tk.Frame.__init__(self, parent)
 
         """Left Frame"""
@@ -106,8 +108,8 @@ class PageOverview(tk.Frame):
             self.frame_middle, text="CURRENTLY ACTIVE AGENTS")
         self.title_active_agents.pack()
 
-        # Mock para teste; Retirar depois
-        self.active_agents = ["Zone R.1", "Zone R.2"]
+        # TODO fazer ser dinâmico
+        self.active_agents = multiagent_system.nameserver.agents()
 
         for agent in self.active_agents:
             new_active_agent = ttk.Label(
@@ -145,7 +147,7 @@ class PageOverview(tk.Frame):
 
 
 class PageEnergyTransactions(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, multiagent_system):
         tk.Frame.__init__(self, parent)
 
         """Left Frame"""
@@ -225,7 +227,7 @@ class PageEnergyTransactions(tk.Frame):
 
 
 class PageEnergyData(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, multiagent_system):
         tk.Frame.__init__(self, parent)
 
         """Left Frame"""
@@ -309,7 +311,7 @@ class PageEnergyData(tk.Frame):
 
 
 class PagePredictions(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, multiagent_system):
         tk.Frame.__init__(self, parent)
 
         """Left Frame"""
@@ -387,11 +389,13 @@ class PagePredictions(tk.Frame):
         self.text_error_generation.pack()
 
 
-""" Agent Info """
+""" Agent Info 
+    Frames belonging to the Agent Info section are set up below:
+"""
 
 
 class PageAgentMainWindow(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, multiagent_system):
         tk.Frame.__init__(self, parent)
 
         """Left Frame"""
@@ -468,7 +472,7 @@ class PageAgentMainWindow(tk.Frame):
 
 
 class PageOptimization(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, multiagent_system):
         tk.Frame.__init__(self, parent)
 
         """Left Frame"""

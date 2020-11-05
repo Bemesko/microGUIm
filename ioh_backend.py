@@ -144,8 +144,8 @@ class MultiagentSystem():
 
         # Setting up agents
         self.agent_amount = 5
-
         self.prosumers = []
+
         for i in range(self.agent_amount):
             agent_name = f"Prosumer{i}"
             self.prosumers.append(run_agent(agent_name, base=Prosumer))
@@ -190,4 +190,3 @@ class MultiagentSystem():
 if __name__ == "__main__":
     mas = MultiagentSystem()
     mas.run_auction_script()
-    mas.shutdown()
