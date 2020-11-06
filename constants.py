@@ -7,6 +7,7 @@ START_PRICE = "starting_price"
 INCREMENT = "increment"
 MIN_PRICE = "min_price"
 MAX_LOT_SIZE = "max_lot_size_wh"
+NAMESERVER_AGENT_AMOUNT = 5
 
 
 class buy_baseline(enum.Enum):

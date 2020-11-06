@@ -135,6 +135,8 @@ class Prosumer(Agent):
 class MultiagentSystem():
 
     def __init__(self):
+        self.current_messages = []
+
         '''Agent Setup'''
         # Setting up nameserver
         self.nameserver = run_nameserver()
@@ -143,7 +145,7 @@ class MultiagentSystem():
         self.auction_sync_agent = run_agent('auction_sync', base=AuctionSync)
 
         # Setting up agents
-        self.agent_amount = 5
+        self.agent_amount = constants.NAMESERVER_AGENT_AMOUNT
         self.prosumers = []
 
         for i in range(self.agent_amount):
@@ -182,6 +184,9 @@ class MultiagentSystem():
                 5, AuctionSync.gather_sellers, i)
         time.sleep(1)
         self.auction_sync_agent.each(5, AuctionSync.auction)
+
+    def update_messages(self):
+        self.current_messages.append()
 
     def shutdown(self):
         self.nameserver.shutdown()

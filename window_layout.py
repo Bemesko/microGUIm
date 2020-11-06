@@ -121,15 +121,14 @@ class PageOverview(tk.Frame):
         self.title_current_messages.pack()
 
         # TODO Mock para teste; Retirar depois
-        self.current_messages = [1, 3, 4, 2]
+        self.current_messages = multiagent_system.current_messages
 
         self.frame_messages = tk.Frame(self.frame_middle)
         self.frame_messages.pack()
 
         for message in self.current_messages:
             new_message = ttk.Label(self.frame_messages, text=message)
-            new_message.grid(
-                row=0, column=self.current_messages.index(message))
+            new_message.pack()
 
         """Right Frame"""
 
