@@ -104,17 +104,16 @@ class PageOverview(tk.Frame):
         self.frame_middle.grid(row=0, column=1, sticky="ns")
 
         # Currently active agents
+        self.frame_agents = tk.Frame(self.frame_middle)
+        self.frame_agents.pack()
+
         self.title_active_agents = ttk.Label(
-            self.frame_middle, text="CURRENTLY ACTIVE AGENTS")
+            self.frame_agents, text="CURRENTLY ACTIVE AGENTS")
         self.title_active_agents.pack()
 
         # TODO fazer ser dinâmico
-        self.active_agents = multiagent_system.nameserver.agents()
-
-        for agent in self.active_agents:
-            new_active_agent = ttk.Label(
-                self.frame_middle, text=agent)
-            new_active_agent.pack()
+        self.labels_active_agents = []
+        self.display_active_agents(multiagent_system)
 
         # Current messages
         self.title_current_messages = ttk.Label(
@@ -139,8 +138,23 @@ class PageOverview(tk.Frame):
 
         # Update Messages
         self.button_update_messages = tk.Button(
-            self.frame_right, text="Update Messages", command=self.update_messages)
+            self.frame_right, text="Update Messages", command=lambda: self.display_active_agents(multiagent_system))
         self.button_update_messages.pack()
+
+    def display_active_agents(self, multiagent_system):
+        for agent in self.labels_active_agents:
+            agent.destroy()
+
+        try:
+            self.active_agents = multiagent_system.nameserver.agents()
+
+            for agent in self.active_agents:
+                new_active_agent = ttk.Label(
+                    self.frame_agents, text=agent)
+                self.labels_active_agents.append(new_active_agent)
+                new_active_agent.pack()
+        except:
+            return
 
     def update_messages(self):
         print("Messages updated!")
