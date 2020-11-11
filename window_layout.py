@@ -16,45 +16,50 @@ class tkinterApp(tk.Tk):
 
         tk.Tk.__init__(self, *args, **kwargs)
 
-        self.setup_top_bar()
+        self.setup_fixed_items()
 
         self.setup_frame_container()
 
-    def setup_top_bar(self):
-        self.top_frame = tk.Frame(self)
-        self.top_frame.pack(side="top", fill="x")
+    def setup_fixed_items(self):
+        self.frame_buttons = tk.Frame(self)
+        self.frame_buttons.grid(row=0, column=0, sticky="nws", padx=5, pady=5)
 
-        self.button_overview = tk.Button(self.top_frame, text="Energy Info",
-                                         command=lambda: self.show_frame(PageOverview))
-        self.button_overview.pack(side="left")
+        self.button_system_info = tk.Button(
+            self.frame_buttons, text="System Info", command=lambda: self.show_frame(PageSystemInfo))
+        self.button_system_info.grid(sticky="wen")
 
-        self.button_agent_window = tk.Button(self.top_frame, text="Agent Info",
-                                             command=lambda: self.show_frame(PageAgentMainWindow))
-        self.button_agent_window.pack(side="left")
+        self.button_graph = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraph))
+        self.button_graph.grid(sticky="we")
 
-        self.button_start_agents = tk.Button(
-            self.top_frame, text="Start Agents", command=self.mas.run_auction_script)
-        self.button_start_agents.pack(side="left")
+        self.button_info = tk.Button(
+            self.frame_buttons, text="Info", command=lambda: self.show_frame(PageAgentInfo))
+        self.button_info.grid(sticky="we")
 
-        self.button_stop_nameserver = tk.Button(
-            self.top_frame, text="Stop Nameserver", command=self.mas.shutdown)
-        self.button_stop_nameserver.pack(side="left")
+        self.frame_middle = tk.Frame(self)
+        self.frame_middle.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
+
+        self.frame_logs = tk.Frame(
+            self, highlightbackground="black", highlightthickness=1)
+        self.frame_logs.grid(row=0, column=2, sticky="nes")
+
+        self.label = tk.Label(self.frame_logs, text="SYSTEM LOGS")
+        self.label.grid(sticky="w")
 
     def setup_frame_container(self):
-        self.container = tk.Frame(self)
-        self.container.pack(side="top", fill="both", expand=True)
 
         self.frames = {}
 
-        for new_frame in (PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData, PageGraph):
+        # PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData, PageGraph,
+        for new_frame in (PageSystemInfo, PageGraph, PageAgentInfo):
 
-            frame = new_frame(self.container, self, self.mas)
+            frame = new_frame(self.frame_middle, self, self.mas)
 
             self.frames[new_frame] = frame
 
-            frame.grid(row=1, column=0, sticky="nswe", padx=15, pady=15)
+            frame.grid(row=0, column=0, sticky="nswe", padx=15, pady=15)
 
-        self.show_frame(PageGraph)
+        self.show_frame(PageSystemInfo)
 
     def show_frame(self, desired_frame):
         frame = self.frames[desired_frame]
@@ -68,6 +73,88 @@ class tkinterApp(tk.Tk):
                 pass
             finally:
                 self.destroy()
+
+
+class PageSystemInfo(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+
+        self.label_system_active = tk.Label(
+            self, text="System is ON")
+        self.label_system_active.pack()
+
+        self.button_start_script = tk.Button(
+            self, text="Start Script")
+        self.button_start_script.pack(fill=tk.X)
+
+        self.button_kill_server = tk.Button(
+            self, text="Kill Server")
+        self.button_kill_server.pack(fill=tk.X)
+
+        self.label_active_time = tk.Label(
+            self, text="Active for 00:00:00")
+        self.label_active_time.pack()
+
+
+class PageGraph(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+
+        # the figure that will contain the plot
+        fig = Figure(figsize=(5, 5),
+                     dpi=100)
+
+        # list of squares
+        y = [i**2 for i in range(101)]
+
+        # adding the subplot
+        plot1 = fig.add_subplot(111)
+
+        # plotting the graph
+        plot1.plot(y)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        canvas = FigureCanvasTkAgg(fig,
+                                   master=self)
+        canvas.draw()
+
+        # placing the canvas on the Tkinter window
+        canvas.get_tk_widget().pack()
+
+        # creating the Matplotlib toolbar
+        toolbar = NavigationToolbar2Tk(canvas,
+                                       self)
+        toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        canvas.get_tk_widget().pack()
+
+
+class PageAgentInfo(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system):
+        tk.Frame.__init__(self, parent)
+        self.labels_active_agents = []
+
+        self.label_title_agents = tk.Label(self, text="SYSTEM AGENTS")
+        self.label_title_agents.pack()
+
+        self.display_active_agents(multiagent_system)
+
+    def display_active_agents(self, multiagent_system):
+        for agent in self.labels_active_agents:
+            agent.destroy()
+
+        try:
+            self.active_agents = multiagent_system.nameserver.agents()
+
+            for agent in self.active_agents:
+                new_active_agent = ttk.Label(
+                    self, text=f"(ON) {agent}: WAITING")
+                self.labels_active_agents.append(new_active_agent)
+                new_active_agent.pack(fill=tk.X)
+        except:
+            return
 
 
 """ General Info 
@@ -534,46 +621,12 @@ class PageOptimization(tk.Frame):
             self.frame_optimization, text="Reduced Consumption: --W")
         self.text_reduced_consumption.grid(row=2)
 
-
-class PageGraph(tk.Frame):
-    def __init__(self, parent, controller, multiagent_system):
-        tk.Frame.__init__(self, parent)
-
-        # the figure that will contain the plot
-        fig = Figure(figsize=(5, 5),
-                     dpi=100)
-
-        # list of squares
-        y = [i**2 for i in range(101)]
-
-        # adding the subplot
-        plot1 = fig.add_subplot(111)
-
-        # plotting the graph
-        plot1.plot(y)
-
-        # creating the Tkinter canvas
-        # containing the Matplotlib figure
-        canvas = FigureCanvasTkAgg(fig,
-                                   master=self)
-        canvas.draw()
-
-        # placing the canvas on the Tkinter window
-        canvas.get_tk_widget().pack()
-
-        # creating the Matplotlib toolbar
-        toolbar = NavigationToolbar2Tk(canvas,
-                                       self)
-        toolbar.update()
-
-        # placing the toolbar on the Tkinter window
-        canvas.get_tk_widget().pack()
-
     # Driver Code
+
+
 if __name__ == "__main__":
     app = tkinterApp()
     app.title("Agent Monitoring System")
-    app.geometry("600x400")
     app.protocol("WM_DELETE_WINDOW", app.on_closing)
 
     app.mainloop()

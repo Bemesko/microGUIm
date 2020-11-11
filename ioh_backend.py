@@ -32,25 +32,23 @@ class AuctionSync(Agent):
         self.seller_agents = []
 
     def auction(self):
-        self.log_info(f"Started auction with {self.seller_agents}")
+        for agent in self.seller_agents:
+            if(agent.get_attr("is_seller")):
+                self.log_info(f"Started auction with {self.seller_agents}")
 
 
 class Prosumer(Agent):
     def on_init(self):
         self.next_energy_consumption = 0
         self.next_energy_generation = 0
-        self.predictions_at = 18
-        self.calculations_at = 21
-        self.store_data = True
         self.is_seller = False
         self.energy_difference = 0
         self.energy_market_price = 0
         self.wanted_energy = 0
-        self.energy_buying_max_price = 0
-        self.energy_buying_starting_price = 0
+        self.energy_buy_max_price = 0
+        self.energy_buy_starting_price = 0
         self.energy_buy_price_increment = 0
-        self.energy_selling_min_price = 0
-        self.energy_sold = False
+        self.energy_sell_min_price = 0
         self.buy_parameters = {
             constants.BASELINE: constants.buy_baseline.deficit,
             constants.ENERGY: 80,
@@ -117,16 +115,16 @@ class Prosumer(Agent):
         market_price = int(message)
         self.energy_market_price = int(message)
 
-        self.energy_buying_starting_price = market_price * \
+        self.energy_buy_starting_price = market_price * \
             self.buy_parameters[constants.START_PRICE] / 100
         self.energy_buy_price_increment = self.energy_market_price * \
             self.buy_parameters[constants.INCREMENT] / 100
-        self.energy_buying_max_price = self.energy_market_price * \
+        self.energy_buy_max_price = self.energy_market_price * \
             self.buy_parameters[constants.MAX_PRICE] / 100
-        self.energy_selling_min_price = self.energy_market_price * \
+        self.energy_sell_min_price = self.energy_market_price * \
             self.sell_parameters[constants.MIN_PRICE] / 100
         self.log_info(
-            f"Prices gathered! Market: {self.energy_market_price}; Buy Start: {self.energy_buying_starting_price}; Buy Increment: {self.energy_buy_price_increment}; Buy Max: {self.energy_buying_max_price}; Sell Min: {self.energy_selling_min_price}")
+            f"Prices gathered! Market: {self.energy_market_price}; Buy Start: {self.energy_buy_starting_price}; Buy Increment: {self.energy_buy_price_increment}; Buy Max: {self.energy_buy_max_price}; Sell Min: {self.energy_sell_min_price}")
 
     def answer_sell_request(self, message):
         return self.is_seller
@@ -177,6 +175,8 @@ class MultiagentSystem():
         time.sleep(1)
         for current_agent in range(self.agent_amount):
             self.prosumers[current_agent].each(5, Prosumer.get_bids)
+            print(self.prosumers[current_agent].get_attr(
+                "sell_parameters"))
         time.sleep(1)
         self.auction_sync_agent.each(5, AuctionSync.reset_seller_list)
         for i in range(self.agent_amount):
