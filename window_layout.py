@@ -1,8 +1,11 @@
-import tkinter as tk
-from tkinter import ttk
 from tkinter import messagebox
-
+from tkinter import ttk
+import tkinter as tk
 import ioh_backend
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+import matplotlib
+matplotlib.use("TkAgg")
 
 
 class tkinterApp(tk.Tk):
@@ -43,7 +46,7 @@ class tkinterApp(tk.Tk):
 
         self.frames = {}
 
-        for new_frame in (PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData):
+        for new_frame in (PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData, PageGraph):
 
             frame = new_frame(self.container, self, self.mas)
 
@@ -51,7 +54,7 @@ class tkinterApp(tk.Tk):
 
             frame.grid(row=1, column=0, sticky="nswe", padx=15, pady=15)
 
-        self.show_frame(PageAgentMainWindow)
+        self.show_frame(PageGraph)
 
     def show_frame(self, desired_frame):
         frame = self.frames[desired_frame]
@@ -532,7 +535,41 @@ class PageOptimization(tk.Frame):
         self.text_reduced_consumption.grid(row=2)
 
 
-# Driver Code
+class PageGraph(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system):
+        tk.Frame.__init__(self, parent)
+
+        # the figure that will contain the plot
+        fig = Figure(figsize=(5, 5),
+                     dpi=100)
+
+        # list of squares
+        y = [i**2 for i in range(101)]
+
+        # adding the subplot
+        plot1 = fig.add_subplot(111)
+
+        # plotting the graph
+        plot1.plot(y)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        canvas = FigureCanvasTkAgg(fig,
+                                   master=self)
+        canvas.draw()
+
+        # placing the canvas on the Tkinter window
+        canvas.get_tk_widget().pack()
+
+        # creating the Matplotlib toolbar
+        toolbar = NavigationToolbar2Tk(canvas,
+                                       self)
+        toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        canvas.get_tk_widget().pack()
+
+    # Driver Code
 if __name__ == "__main__":
     app = tkinterApp()
     app.title("Agent Monitoring System")
