@@ -13,6 +13,8 @@ class AuctionSync(Agent):
         self.current_market_prices = 0
         self.seller_agents = []
 
+        # ter uma lista aqui com todos os caras a partir do nameserver
+
     def generate_market_prices(self):
         self.current_market_prices = random.randrange(1, 100)
 
@@ -32,9 +34,10 @@ class AuctionSync(Agent):
         self.seller_agents = []
 
     def auction(self):
-        for agent in self.seller_agents:
-            if(agent.get_attr("is_seller")):
-                self.log_info(f"Started auction with {self.seller_agents}")
+        pass
+        # for agent in self.seller_agents:
+        #     if(agent.get_attr("is_seller")):
+        #         self.log_info(f"Started auction with {self.seller_agents}")
 
 
 class Prosumer(Agent):
@@ -63,8 +66,11 @@ class Prosumer(Agent):
             constants.MAX_LOT_SIZE: 100
         }
 
+        self.all_energy_consumption = []
+
     def predict_energy(self):
         self.next_energy_consumption = random.randrange(1, 100)
+        self.all_energy_consumption.append(self.next_energy_consumption)
         self.next_energy_generation = random.randrange(1, 100)
         self.log_info(
             f"Predicted Consumption: {self.next_energy_consumption}; Generation: {self.next_energy_generation}")
@@ -133,7 +139,8 @@ class Prosumer(Agent):
 class MultiagentSystem():
 
     def __init__(self):
-        self.current_messages = []
+        self.agent_attributes = [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
+            23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]]
 
         '''Agent Setup'''
         # Setting up nameserver
@@ -147,7 +154,7 @@ class MultiagentSystem():
         self.prosumers = []
 
         for i in range(self.agent_amount):
-            agent_name = f"Prosumer{i}"
+            agent_name = f"prosumer_{i}"
             self.prosumers.append(run_agent(agent_name, base=Prosumer))
 
         '''Communications Setup'''
@@ -175,8 +182,6 @@ class MultiagentSystem():
         time.sleep(1)
         for current_agent in range(self.agent_amount):
             self.prosumers[current_agent].each(5, Prosumer.get_bids)
-            print(self.prosumers[current_agent].get_attr(
-                "sell_parameters"))
         time.sleep(1)
         self.auction_sync_agent.each(5, AuctionSync.reset_seller_list)
         for i in range(self.agent_amount):
@@ -185,8 +190,11 @@ class MultiagentSystem():
         time.sleep(1)
         self.auction_sync_agent.each(5, AuctionSync.auction)
 
-    def update_messages(self):
-        self.current_messages.append()
+    def get_agent_attributes(self):
+        a = []
+        for prosumer in self.prosumers:
+            a.append(prosumer.get_attr("all_energy_consumption"))
+        return a
 
     def shutdown(self):
         self.nameserver.shutdown()
