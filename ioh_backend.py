@@ -191,10 +191,9 @@ class MultiagentSystem():
         self.auction_sync_agent.each(5, AuctionSync.auction)
 
     def get_agent_attributes(self):
-        a = []
         for prosumer in self.prosumers:
-            a.append(prosumer.get_attr("all_energy_consumption"))
-        return a
+            self.agent_attributes.append(
+                prosumer.get_attr("all_energy_consumption"))
 
     def shutdown(self):
         self.nameserver.shutdown()
@@ -203,3 +202,4 @@ class MultiagentSystem():
 if __name__ == "__main__":
     mas = MultiagentSystem()
     mas.run_auction_script()
+    mas.get_agent_attributes()

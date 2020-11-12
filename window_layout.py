@@ -24,6 +24,8 @@ class tkinterApp(tk.Tk):
         self.frame_buttons = tk.Frame(self)
         self.frame_buttons.grid(row=0, column=0, sticky="nws", padx=5, pady=5)
 
+        # self.button_update = tk.Button(self.frame_buttons, text="Update", command=lambda: self.)
+
         self.button_system_info = tk.Button(
             self.frame_buttons, text="System Info", command=lambda: self.show_frame(PageSystemInfo))
         self.button_system_info.grid(sticky="wen")
@@ -84,11 +86,11 @@ class PageSystemInfo(tk.Frame):
         self.label_system_active.pack()
 
         self.button_start_script = tk.Button(
-            self, text="Start Script")
+            self, text="Start Script", command=lambda: multiagent_system.run_auction_script())
         self.button_start_script.pack(fill=tk.X)
 
         self.button_kill_server = tk.Button(
-            self, text="Kill Server")
+            self, text="Kill Server", command=lambda: multiagent_system.shutdown())
         self.button_kill_server.pack(fill=tk.X)
 
         self.label_active_time = tk.Label(
@@ -100,6 +102,10 @@ class PageGraph(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
 
+        self.multiagent_system = multiagent_system
+        self.update_graph()
+
+    def update_graph(self):
         # the figure that will contain the plot
         fig = Figure(figsize=(5, 5),
                      dpi=100)
@@ -108,7 +114,7 @@ class PageGraph(tk.Frame):
         plot1 = fig.add_subplot(111)
 
         # plotting the graph
-        for attributes in multiagent_system.agent_attributes:
+        for attributes in self.multiagent_system.agent_attributes:
             plot1.plot(attributes)
 
         # creating the Tkinter canvas
@@ -127,6 +133,8 @@ class PageGraph(tk.Frame):
 
         # placing the toolbar on the Tkinter window
         canvas.get_tk_widget().pack()
+
+        #self.after(1000, self.update_graph)
 
 
 class PageAgentInfo(tk.Frame):
@@ -151,6 +159,8 @@ class PageAgentInfo(tk.Frame):
                     self, text=f"(ON) {agent}: WAITING")
                 self.labels_active_agents.append(new_active_agent)
                 new_active_agent.pack(fill=tk.X)
+            self.after(1000, lambda: self.display_active_agents(
+                multiagent_system))
         except:
             return
 
