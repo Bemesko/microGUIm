@@ -81,6 +81,8 @@ class PageSystemInfo(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
 
+        self.multiagent_system = multiagent_system
+
         self.label_system_active = tk.Label(
             self, text="System is ON")
         self.label_system_active.pack()
@@ -96,6 +98,18 @@ class PageSystemInfo(tk.Frame):
         self.label_active_time = tk.Label(
             self, text="Active for 00:00:00")
         self.label_active_time.pack()
+
+        self.update_labels()
+
+    def update_labels(self):
+        try:
+            agents = self.multiagent_system.nameserver.agents()
+            system_is_on = "ON" if len(agents) > 0 else "OFF"
+            self.label_system_active.configure(
+                text=f"System is {system_is_on}")
+            self.after(1000, self.update_labels)
+        except:
+            pass
 
 
 class PageGraph(tk.Frame):
