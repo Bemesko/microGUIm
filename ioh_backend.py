@@ -140,8 +140,23 @@ class MultiagentSystem():
 
     def __init__(self):
         self.agent_attributes = {
-            "next_energy_consumption": [[35, 23, 78, 12], [12, 54, 23, 65, 34], [23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]]
+            constants.NEXT_ENERGY_CONSUMPTION: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
+                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
+            constants.NEXT_ENERGY_GENERATION: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
+                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
+            constants.ENERGY_DIFFERENCE: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
+                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
+            constants.ENERGY_MARKET_PRICE: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
+                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
+            constants.ENERGY_BUY_STARTING_PRICE: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
+                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
+            constants.ENERGY_BUY_PRICE_INCREMENT: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
+                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
+            constants.ENERGY_SELL_MIN_PRICE: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
+                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]]
         }
+
+        print(self.agent_attributes)
 
         '''Agent Setup'''
         # Setting up nameserver
@@ -193,7 +208,7 @@ class MultiagentSystem():
 
     def get_agent_attributes(self):
         for prosumer in self.prosumers:
-            self.agent_attributes.append(
+            self.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION].append(
                 prosumer.get_attr("all_energy_consumption"))
 
     def shutdown(self):
