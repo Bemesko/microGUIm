@@ -117,38 +117,41 @@ class PageGraph(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         self.multiagent_system = multiagent_system
-        self.update_graph()
 
-    def update_graph(self):
         # the figure that will contain the plot
-        fig = Figure(figsize=(5, 5),
-                     dpi=100)
-
-        # adding the subplot
-        plot1 = fig.add_subplot(111)
-
-        # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes:
-            plot1.plot(attributes)
+        self.graph_figure = Figure(figsize=(5, 5),
+                                   dpi=100)
 
         # creating the Tkinter canvas
         # containing the Matplotlib figure
-        canvas = FigureCanvasTkAgg(fig,
-                                   master=self)
-        canvas.draw()
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
 
         # placing the canvas on the Tkinter window
-        canvas.get_tk_widget().pack()
+        # self.canvas.get_tk_widget().pack()
 
         # creating the Matplotlib toolbar
-        toolbar = NavigationToolbar2Tk(canvas,
-                                       self)
-        toolbar.update()
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
 
         # placing the toolbar on the Tkinter window
-        canvas.get_tk_widget().pack()
+        self.canvas.get_tk_widget().pack()
+        self.update_graph()
 
-        #self.after(1000, self.update_graph)
+    def update_graph(self):
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot(111)
+
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes:
+            self.plot1.plot(attributes)
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
 
 
 class PageAgentInfo(tk.Frame):
