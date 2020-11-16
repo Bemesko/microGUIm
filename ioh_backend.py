@@ -70,7 +70,17 @@ class Prosumer(Agent):
 
     def predict_energy(self):
         self.next_energy_consumption = random.randrange(1, 100)
-        self.all_energy_consumption.append(self.next_energy_consumption)
+
+        # O código abaixo é uma gambiarra imensa. Deus, por favor, me perdoe.
+        if(len(self.all_energy_consumption) < constants.ATTRIBUTE_LIST_LENGTH):
+            self.all_energy_consumption.append(self.next_energy_consumption)
+        else:
+            for i in range(len(self.all_energy_consumption)):
+                if i > 0:
+                    self.all_energy_consumption[i -
+                                                1] = self.all_energy_consumption[i]
+            self.all_energy_consumption[-1] = self.next_energy_consumption
+
         self.next_energy_generation = random.randrange(1, 100)
         self.log_info(
             f"Predicted Consumption: {self.next_energy_consumption}; Generation: {self.next_energy_generation}")
@@ -156,8 +166,6 @@ class MultiagentSystem():
                 23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]]
         }
 
-        print(self.agent_attributes)
-
         '''Agent Setup'''
         # Setting up nameserver
         self.nameserver = run_nameserver()
@@ -207,9 +215,11 @@ class MultiagentSystem():
         self.auction_sync_agent.each(5, AuctionSync.auction)
 
     def get_agent_attributes(self):
+        i = 0
         for prosumer in self.prosumers:
-            self.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION].append(
-                prosumer.get_attr("all_energy_consumption"))
+            self.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION][i] = prosumer.get_attr(
+                "all_energy_consumption")
+            i += 1
 
     def shutdown(self):
         self.nameserver.shutdown()
@@ -218,4 +228,3 @@ class MultiagentSystem():
 if __name__ == "__main__":
     mas = MultiagentSystem()
     mas.run_auction_script()
-    mas.get_agent_attributes()

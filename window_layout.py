@@ -2,6 +2,7 @@ from tkinter import messagebox
 from tkinter import ttk
 import tkinter as tk
 import ioh_backend
+import constants
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib
@@ -19,6 +20,8 @@ class tkinterApp(tk.Tk):
         self.setup_fixed_items()
 
         self.setup_frame_container()
+
+        self.update_mas_data(self.mas)
 
     def setup_fixed_items(self):
         self.frame_buttons = tk.Frame(self)
@@ -76,6 +79,11 @@ class tkinterApp(tk.Tk):
             finally:
                 self.destroy()
 
+    def update_mas_data(self, multiagent_system):
+        multiagent_system.get_agent_attributes()
+        print(multiagent_system.agent_attributes)
+        self.after(1000, lambda: self.update_mas_data(multiagent_system))
+
 
 class PageSystemInfo(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
@@ -128,9 +136,6 @@ class PageGraph(tk.Frame):
                                         master=self)
         self.canvas.draw()
 
-        # placing the canvas on the Tkinter window
-        # self.canvas.get_tk_widget().pack()
-
         # creating the Matplotlib toolbar
         self.toolbar = NavigationToolbar2Tk(self.canvas,
                                             self)
@@ -138,15 +143,20 @@ class PageGraph(tk.Frame):
 
         # placing the toolbar on the Tkinter window
         self.canvas.get_tk_widget().pack()
+
         self.update_graph()
 
     def update_graph(self):
 
+        self.graph_figure.clear()
+
+        self.graph_figure.legend()
+
         # adding the subplot
-        self.plot1 = self.graph_figure.add_subplot(111)
+        self.plot1 = self.graph_figure.add_subplot()
 
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes:
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
             self.plot1.plot(attributes)
 
         self.canvas.draw()

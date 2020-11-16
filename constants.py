@@ -8,6 +8,7 @@ INCREMENT = "increment"
 MIN_PRICE = "min_price"
 MAX_LOT_SIZE = "max_lot_size_wh"
 NAMESERVER_AGENT_AMOUNT = 5
+ATTRIBUTE_LIST_LENGTH = 10
 
 NEXT_ENERGY_CONSUMPTION = "next_energy_consumption"
 NEXT_ENERGY_GENERATION = "next_energy_generation"
