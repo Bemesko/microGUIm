@@ -55,7 +55,6 @@ class tkinterApp(tk.Tk):
 
         self.frames = {}
 
-        # PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData, PageGraph,
         for new_frame in (PageSystemInfo, PageGraphNextConsumption, PageAgentInfo):
 
             frame = new_frame(self.frame_middle, self, self.mas)
@@ -87,15 +86,14 @@ class tkinterApp(tk.Tk):
             multiagent_system.get_agent_attributes()
         except:
             pass
-        finally:
-            self.after(1000, lambda: self.update_mas_data(multiagent_system))
+        self.after(1000, lambda: self.update_mas_data(multiagent_system))
 
 
 class PageSystemInfo(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
 
-        self.multiagent_system = multiagent_system
+        self.mas = multiagent_system
         self.is_visible = False
 
         self.label_system_active = tk.Label(
@@ -106,9 +104,10 @@ class PageSystemInfo(tk.Frame):
             self, text="Start Script", command=self.run_mas_script)
         self.button_start_script.pack(fill=tk.X)
 
-        self.button_kill_server = tk.Button(
-            self, text="Kill Server", command=self.mas_shutdown)
-        self.button_kill_server.pack(fill=tk.X)
+        # O botão abaixo causa uns erros muito bizarros e não vou mexer nele por enquanto
+        # self.button_kill_server = tk.Button(
+        #     self, text="Kill Server", command=lambda: self.mas_shutdown(multiagent_system))
+        # self.button_kill_server.pack(fill=tk.X)
 
         self.label_active_time = tk.Label(
             self, text="Active for 00:00:00")
@@ -119,23 +118,23 @@ class PageSystemInfo(tk.Frame):
     def update_labels(self):
         if(self.is_visible):
             try:
-                agents = self.multiagent_system.nameserver.agents()
+                agents = self.mas.nameserver.agents()
                 system_is_on = "ON" if len(agents) > 0 else "OFF"
                 self.label_system_active.configure(
                     text=f"System is {system_is_on}")
             except:
                 pass
-        self.after(500, self.update_labels)
+        # self.after(500, self.update_labels)
 
     def run_mas_script(self):
         try:
-            self.multiagent_system.run_auction_script()
+            self.mas.run_auction_script()
         except:
             pass
 
-    def mas_shutdown(self):
+    def mas_shutdown(self, multiagent_system):
         try:
-            self.multiagent_system.shutdown()
+            self.mas.shutdown()
         except:
             pass
 
@@ -144,7 +143,7 @@ class PageGraphNextConsumption(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
 
-        self.multiagent_system = multiagent_system
+        self.mas = multiagent_system
         self.is_visible = False
 
         # the figure that will contain the plot
@@ -175,9 +174,8 @@ class PageGraphNextConsumption(tk.Frame):
             self.plot1 = self.graph_figure.add_subplot()
 
             agent_i = 0
-            # plotting the graph
             try:
-                for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+                for attributes in self.mas.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
                     self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
                     self.plot1.legend(
                         loc='upper left', borderaxespad=0.)
@@ -190,7 +188,7 @@ class PageGraphNextConsumption(tk.Frame):
 
             self.canvas.draw()
 
-        self.after(500, self.update_graph)
+        #self.after(500, self.update_graph)
 
 
 class PageAgentInfo(tk.Frame):
@@ -221,7 +219,7 @@ class PageAgentInfo(tk.Frame):
                     new_active_agent.pack(fill=tk.X)
             except:
                 return
-        self.after(500, lambda: self.display_active_agents(multiagent_system))
+        # self.after(500, lambda: self.display_active_agents(multiagent_system))
 
 
 if __name__ == "__main__":

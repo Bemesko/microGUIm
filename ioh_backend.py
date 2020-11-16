@@ -208,6 +208,7 @@ class MultiagentSystem():
                 5, AuctionSync.gather_sellers, i)
         time.sleep(1)
         self.auction_sync_agent.each(5, AuctionSync.auction)
+        self.nameserver.shutdown()
 
     def get_agent_attributes(self):
         i = 0
