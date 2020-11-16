@@ -34,7 +34,7 @@ class tkinterApp(tk.Tk):
         self.button_system_info.grid(sticky="wen")
 
         self.button_graph = tk.Button(
-            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraph))
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphNextConsumption))
         self.button_graph.grid(sticky="we")
 
         self.button_info = tk.Button(
@@ -56,7 +56,7 @@ class tkinterApp(tk.Tk):
         self.frames = {}
 
         # PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData, PageGraph,
-        for new_frame in (PageSystemInfo, PageGraph, PageAgentInfo):
+        for new_frame in (PageSystemInfo, PageGraphNextConsumption, PageAgentInfo):
 
             frame = new_frame(self.frame_middle, self, self.mas)
 
@@ -81,7 +81,6 @@ class tkinterApp(tk.Tk):
 
     def update_mas_data(self, multiagent_system):
         multiagent_system.get_agent_attributes()
-        print(multiagent_system.agent_attributes)
         self.after(1000, lambda: self.update_mas_data(multiagent_system))
 
 
@@ -120,9 +119,10 @@ class PageSystemInfo(tk.Frame):
             pass
 
 
-class PageGraph(tk.Frame):
+class PageGraphNextConsumption(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -159,6 +159,9 @@ class PageGraph(tk.Frame):
             self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
             self.plot1.legend(
                 loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
             agent_i += 1
 
         self.canvas.draw()
