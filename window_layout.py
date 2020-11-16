@@ -27,15 +27,45 @@ class tkinterApp(tk.Tk):
         self.frame_buttons = tk.Frame(self)
         self.frame_buttons.grid(row=0, column=0, sticky="nws", padx=5, pady=5)
 
-        # self.button_update = tk.Button(self.frame_buttons, text="Update", command=lambda: self.)
-
         self.button_system_info = tk.Button(
             self.frame_buttons, text="System Info", command=lambda: self.show_frame(PageSystemInfo))
         self.button_system_info.grid(sticky="wen")
 
-        self.button_graph = tk.Button(
+        self.button_graph_next_consumption = tk.Button(
             self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphNextConsumption))
-        self.button_graph.grid(sticky="we")
+        self.button_graph_next_consumption.grid(sticky="we")
+
+        self.button_graph_next_generation = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphNextGeneration))
+        self.button_graph_next_generation.grid(sticky="we")
+
+        self.button_graph_difference = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphDifference))
+        self.button_graph_difference.grid(sticky="we")
+
+        self.button_graph_market_price = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphMarketPrice))
+        self.button_graph_market_price.grid(sticky="we")
+
+        self.button_graph_wanted_energy = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphWantedEnergy))
+        self.button_graph_next_generation.grid(sticky="we")
+
+        self.button_graph_max_price = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphMaxPrice))
+        self.button_graph_max_price.grid(sticky="we")
+
+        self.button_graph_start_price = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphStartPrice))
+        self.button_graph_start_price.grid(sticky="we")
+
+        self.button_graph_increment = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphIncrement))
+        self.button_graph_increment.grid(sticky="we")
+
+        self.button_graph_min_price = tk.Button(
+            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphMinPrice))
+        self.button_graph_increment.grid(sticky="we")
 
         self.button_info = tk.Button(
             self.frame_buttons, text="Info", command=lambda: self.show_frame(PageAgentInfo))
@@ -56,7 +86,7 @@ class tkinterApp(tk.Tk):
         self.frames = {}
 
         # PageAgentMainWindow, PageEnergyTransactions, PageOptimization, PageOverview, PagePredictions, PageEnergyData, PageGraph,
-        for new_frame in (PageSystemInfo, PageGraphNextConsumption, PageAgentInfo):
+        for new_frame in (PageSystemInfo, PageGraphNextConsumption, PageGraphNextGeneration, PageGraphDifference, PageGraphMarketPrice, PageGraphWantedEnergy, PageGraphMaxPrice, PageGraphStartPrice, PageGraphIncrement, PageGraphMinPrice, PageAgentInfo):
 
             frame = new_frame(self.frame_middle, self, self.mas)
 
@@ -120,6 +150,406 @@ class PageSystemInfo(tk.Frame):
 
 
 class PageGraphNextConsumption(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
+
+        self.multiagent_system = multiagent_system
+
+        # the figure that will contain the plot
+        self.graph_figure = Figure(figsize=(10, 7),
+                                   dpi=100)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
+
+        # creating the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        self.canvas.get_tk_widget().pack()
+
+        self.update_graph()
+
+    def update_graph(self):
+
+        self.graph_figure.clear()
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot()
+
+        agent_i = 0
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+            agent_i += 1
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
+
+
+class PageGraphNextGeneration(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
+
+        self.multiagent_system = multiagent_system
+
+        # the figure that will contain the plot
+        self.graph_figure = Figure(figsize=(10, 7),
+                                   dpi=100)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
+
+        # creating the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        self.canvas.get_tk_widget().pack()
+
+        self.update_graph()
+
+    def update_graph(self):
+
+        self.graph_figure.clear()
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot()
+
+        agent_i = 0
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+            agent_i += 1
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
+
+
+class PageGraphDifference(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
+
+        self.multiagent_system = multiagent_system
+
+        # the figure that will contain the plot
+        self.graph_figure = Figure(figsize=(10, 7),
+                                   dpi=100)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
+
+        # creating the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        self.canvas.get_tk_widget().pack()
+
+        self.update_graph()
+
+    def update_graph(self):
+
+        self.graph_figure.clear()
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot()
+
+        agent_i = 0
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+            agent_i += 1
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
+
+
+class PageGraphMarketPrice(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
+
+        self.multiagent_system = multiagent_system
+
+        # the figure that will contain the plot
+        self.graph_figure = Figure(figsize=(10, 7),
+                                   dpi=100)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
+
+        # creating the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        self.canvas.get_tk_widget().pack()
+
+        self.update_graph()
+
+    def update_graph(self):
+
+        self.graph_figure.clear()
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot()
+
+        agent_i = 0
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+            agent_i += 1
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
+
+
+class PageGraphWantedEnergy(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
+
+        self.multiagent_system = multiagent_system
+
+        # the figure that will contain the plot
+        self.graph_figure = Figure(figsize=(10, 7),
+                                   dpi=100)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
+
+        # creating the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        self.canvas.get_tk_widget().pack()
+
+        self.update_graph()
+
+    def update_graph(self):
+
+        self.graph_figure.clear()
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot()
+
+        agent_i = 0
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+            agent_i += 1
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
+
+
+class PageGraphMaxPrice(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
+
+        self.multiagent_system = multiagent_system
+
+        # the figure that will contain the plot
+        self.graph_figure = Figure(figsize=(10, 7),
+                                   dpi=100)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
+
+        # creating the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        self.canvas.get_tk_widget().pack()
+
+        self.update_graph()
+
+    def update_graph(self):
+
+        self.graph_figure.clear()
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot()
+
+        agent_i = 0
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+            agent_i += 1
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
+
+
+class PageGraphStartPrice(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
+
+        self.multiagent_system = multiagent_system
+
+        # the figure that will contain the plot
+        self.graph_figure = Figure(figsize=(10, 7),
+                                   dpi=100)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
+
+        # creating the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        self.canvas.get_tk_widget().pack()
+
+        self.update_graph()
+
+    def update_graph(self):
+
+        self.graph_figure.clear()
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot()
+
+        agent_i = 0
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+            agent_i += 1
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
+
+
+class PageGraphIncrement(tk.Frame):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        tk.Frame.__init__(self, parent)
+        self.label_title = tk.Label(self, text="Next Energy Consumption")
+
+        self.multiagent_system = multiagent_system
+
+        # the figure that will contain the plot
+        self.graph_figure = Figure(figsize=(10, 7),
+                                   dpi=100)
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.canvas = FigureCanvasTkAgg(self.graph_figure,
+                                        master=self)
+        self.canvas.draw()
+
+        # creating the Matplotlib toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas,
+                                            self)
+        self.toolbar.update()
+
+        # placing the toolbar on the Tkinter window
+        self.canvas.get_tk_widget().pack()
+
+        self.update_graph()
+
+    def update_graph(self):
+
+        self.graph_figure.clear()
+
+        # adding the subplot
+        self.plot1 = self.graph_figure.add_subplot()
+
+        agent_i = 0
+        # plotting the graph
+        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            self.plot1.set_title("Next Energy Consumption")
+            self.plot1.set_xlabel("System Cycles")
+            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+            agent_i += 1
+
+        self.canvas.draw()
+
+        self.after(1000, self.update_graph)
+
+
+class PageGraphMinPrice(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
         self.label_title = tk.Label(self, text="Next Energy Consumption")
