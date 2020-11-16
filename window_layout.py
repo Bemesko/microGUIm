@@ -95,9 +95,12 @@ class tkinterApp(tk.Tk):
             frame.grid(row=0, column=0, sticky="nswe", padx=15, pady=15)
 
         self.show_frame(PageSystemInfo)
+        self.last_frame = PageSystemInfo
 
     def show_frame(self, desired_frame):
+        self.last_frame.is_visible = False
         frame = self.frames[desired_frame]
+        frame.is_visible = True
         frame.tkraise()
 
     def on_closing(self):
@@ -110,8 +113,12 @@ class tkinterApp(tk.Tk):
                 self.destroy()
 
     def update_mas_data(self, multiagent_system):
-        multiagent_system.get_agent_attributes()
-        self.after(1000, lambda: self.update_mas_data(multiagent_system))
+        try:
+            multiagent_system.get_agent_attributes()
+        except:
+            pass
+        finally:
+            self.after(1000, lambda: self.update_mas_data(multiagent_system))
 
 
 class PageSystemInfo(tk.Frame):
@@ -119,17 +126,18 @@ class PageSystemInfo(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         self.multiagent_system = multiagent_system
+        self.is_visible = False
 
         self.label_system_active = tk.Label(
             self, text="System is ON")
         self.label_system_active.pack()
 
         self.button_start_script = tk.Button(
-            self, text="Start Script", command=lambda: multiagent_system.run_auction_script())
+            self, text="Start Script", command=self.run_mas_script)
         self.button_start_script.pack(fill=tk.X)
 
         self.button_kill_server = tk.Button(
-            self, text="Kill Server", command=lambda: multiagent_system.shutdown())
+            self, text="Kill Server", command=self.mas_shutdown)
         self.button_kill_server.pack(fill=tk.X)
 
         self.label_active_time = tk.Label(
@@ -139,12 +147,28 @@ class PageSystemInfo(tk.Frame):
         self.update_labels()
 
     def update_labels(self):
+        if(self.is_visible):
+            print("not visible")
+            return
         try:
             agents = self.multiagent_system.nameserver.agents()
             system_is_on = "ON" if len(agents) > 0 else "OFF"
             self.label_system_active.configure(
                 text=f"System is {system_is_on}")
+        except:
+            pass
+        finally:
             self.after(1000, self.update_labels)
+
+    def run_mas_script(self):
+        try:
+            self.multiagent_system.run_auction_script()
+        except:
+            pass
+
+    def mas_shutdown(self):
+        try:
+            self.multiagent_system.shutdown()
         except:
             pass
 
@@ -152,7 +176,6 @@ class PageSystemInfo(tk.Frame):
 class PageGraphNextConsumption(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -185,24 +208,26 @@ class PageGraphNextConsumption(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Next Energy Consumption")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
-        self.after(1000, self.update_graph)
+        # self.after(1000, self.update_graph)
 
 
 class PageGraphNextGeneration(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -235,14 +260,17 @@ class PageGraphNextGeneration(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_GENERATION]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Next Energy Generation")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Predicted Energy Generation (Wh)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
@@ -252,7 +280,6 @@ class PageGraphNextGeneration(tk.Frame):
 class PageGraphDifference(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -285,14 +312,17 @@ class PageGraphDifference(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.ENERGY_DIFFERENCE]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Energy Difference")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Energy Difference (Wh)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
@@ -302,7 +332,6 @@ class PageGraphDifference(tk.Frame):
 class PageGraphMarketPrice(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -335,14 +364,17 @@ class PageGraphMarketPrice(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.ENERGY_MARKET_PRICE]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Energy Market Price")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Energy Market Price ($)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
@@ -352,7 +384,6 @@ class PageGraphMarketPrice(tk.Frame):
 class PageGraphWantedEnergy(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -385,14 +416,17 @@ class PageGraphWantedEnergy(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.WANTED_ENERGY]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Wanted Energy by Agent")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Wanted energy (Wh)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
@@ -402,7 +436,6 @@ class PageGraphWantedEnergy(tk.Frame):
 class PageGraphMaxPrice(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -435,24 +468,26 @@ class PageGraphMaxPrice(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.ENERGY_BUY_MAX_PRICE]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Highest Price to Buy Energy")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Max Price ($)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
-        self.after(1000, self.update_graph)
+        # self.after(1000, self.update_graph)
 
 
 class PageGraphStartPrice(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -485,24 +520,26 @@ class PageGraphStartPrice(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.ENERGY_BUY_STARTING_PRICE]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Starting Price to buy Energy")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Starting Price ($)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
-        self.after(1000, self.update_graph)
+        # self.after(1000, self.update_graph)
 
 
 class PageGraphIncrement(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -535,24 +572,26 @@ class PageGraphIncrement(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.ENERGY_BUY_PRICE_INCREMENT]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Bid Price Increment")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Bid Increment ($)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
-        self.after(1000, self.update_graph)
+        # self.after(1000, self.update_graph)
 
 
 class PageGraphMinPrice(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
-        self.label_title = tk.Label(self, text="Next Energy Consumption")
 
         self.multiagent_system = multiagent_system
 
@@ -585,18 +624,21 @@ class PageGraphMinPrice(tk.Frame):
 
         agent_i = 0
         # plotting the graph
-        for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
-            self.plot1.legend(
-                loc='upper left', borderaxespad=0.)
-            self.plot1.set_title("Next Energy Consumption")
-            self.plot1.set_xlabel("System Cycles")
-            self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
-            agent_i += 1
+        try:
+            for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+                self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+                self.plot1.legend(
+                    loc='upper left', borderaxespad=0.)
+                self.plot1.set_title("Lowest Price to Sell Energy")
+                self.plot1.set_xlabel("System Cycles")
+                self.plot1.set_ylabel("Lowest Price ($)")
+                agent_i += 1
+        except:
+            pass
 
         self.canvas.draw()
 
-        self.after(1000, self.update_graph)
+        # self.after(1000, self.update_graph)
 
 
 class PageAgentInfo(tk.Frame):

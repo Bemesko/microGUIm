@@ -185,7 +185,9 @@ class MultiagentSystem():
             constants.NEXT_ENERGY_CONSUMPTION: [[] for agent in self.prosumers],
             constants.NEXT_ENERGY_GENERATION: [[] for agent in self.prosumers],
             constants.ENERGY_DIFFERENCE: [[] for agent in self.prosumers],
+            constants.WANTED_ENERGY: [[] for agent in self.prosumers],
             constants.ENERGY_MARKET_PRICE: [[] for agent in self.prosumers],
+            constants.ENERGY_BUY_MAX_PRICE: [[] for agent in self.prosumers],
             constants.ENERGY_BUY_STARTING_PRICE: [[] for agent in self.prosumers],
             constants.ENERGY_BUY_PRICE_INCREMENT: [[] for agent in self.prosumers],
             constants.ENERGY_SELL_MIN_PRICE: [[] for agent in self.prosumers]
@@ -221,3 +223,4 @@ class MultiagentSystem():
 if __name__ == "__main__":
     mas = MultiagentSystem()
     mas.run_auction_script()
+    mas.shutdown()
