@@ -34,8 +34,12 @@ class tkinterApp(tk.Tk):
         self.button_system_info.grid(sticky="wen")
 
         self.button_graph_next_consumption = tk.Button(
-            self.frame_buttons, text="Graph", command=lambda: self.show_frame(PageGraphNextConsumption))
+            self.frame_buttons, text="Next Consumption", command=lambda: self.show_frame(PageGraphNextConsumption))
         self.button_graph_next_consumption.grid(sticky="we")
+
+        self.button_graph_next_generation = tk.Button(
+            self.frame_buttons, text="Next Generation", command=lambda: self.show_frame(PageGraphNextGeneration))
+        self.button_graph_next_generation.grid(sticky="we")
 
         self.button_info = tk.Button(
             self.frame_buttons, text="Info", command=lambda: self.show_frame(PageAgentInfo))
@@ -55,7 +59,7 @@ class tkinterApp(tk.Tk):
 
         self.frames = {}
 
-        for new_frame in (PageSystemInfo, PageGraphNextConsumption, PageAgentInfo):
+        for new_frame in (PageSystemInfo, PageGraphNextConsumption, PageGraphNextGeneration, PageAgentInfo):
 
             frame = new_frame(self.frame_middle, self, self.mas)
 
@@ -124,7 +128,7 @@ class PageSystemInfo(tk.Frame):
                     text=f"System is {system_is_on}")
             except:
                 pass
-        # self.after(500, self.update_labels)
+        self.after(500, self.update_labels)
 
     def run_mas_script(self):
         try:
@@ -139,7 +143,7 @@ class PageSystemInfo(tk.Frame):
             pass
 
 
-class PageGraphNextConsumption(tk.Frame):
+class PageGraph(tk.Frame):
     def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
         tk.Frame.__init__(self, parent)
 
@@ -164,9 +168,7 @@ class PageGraphNextConsumption(tk.Frame):
         # placing the toolbar on the Tkinter window
         self.canvas.get_tk_widget().pack()
 
-        self.update_graph()
-
-    def update_graph(self):
+    def update_graph(self, attribute, title, xlabel, ylabel):
         if(self.is_visible):
             self.graph_figure.clear()
 
@@ -175,20 +177,45 @@ class PageGraphNextConsumption(tk.Frame):
 
             agent_i = 0
             try:
-                for attributes in self.mas.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
+                for attributes in self.mas.agent_attributes[attribute]:
                     self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
                     self.plot1.legend(
                         loc='upper left', borderaxespad=0.)
-                    self.plot1.set_title("Next Energy Consumption")
-                    self.plot1.set_xlabel("System Cycles")
-                    self.plot1.set_ylabel("Predicted Energy Consumption (Wh)")
+                    self.plot1.set_title(title)
+                    self.plot1.set_xlabel(xlabel)
+                    self.plot1.set_ylabel(ylabel)
                     agent_i += 1
             except:
                 pass
 
             self.canvas.draw()
 
-        #self.after(500, self.update_graph)
+        self.after(500, lambda: self.update_graph(
+            attribute, title, xlabel, ylabel))
+
+
+class PageGraphNextConsumption(PageGraph):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        PageGraph.__init__(self, parent, controller,
+                           multiagent_system, *args, **kwargs)
+        self.update_graph(constants.NEXT_ENERGY_CONSUMPTION, "Next Energy Consumption",
+                          "System Cycles", "Predicted Energy Consumption (W)")
+
+    def update_graph(self, attribute, title, xlabel, ylabel):
+        PageGraph.update_graph(self, constants.NEXT_ENERGY_CONSUMPTION,
+                               "Next Energy Consumption", "System Cycles", "Predicted Energy Consumption (W)")
+
+
+class PageGraphNextGeneration(PageGraph):
+    def __init__(self, parent, controller, multiagent_system, *args, **kwargs):
+        PageGraph.__init__(self, parent, controller,
+                           multiagent_system, *args, **kwargs)
+        self.update_graph(constants.NEXT_ENERGY_GENERATION, "Next Energy Generation",
+                          "System Cycles", "Predicted Energy Generation (W)")
+
+    def update_graph(self, attribute, title, xlabel, ylabel):
+        PageGraph.update_graph(self, constants.NEXT_ENERGY_GENERATION,
+                               "Next Energy Generation", "System Cycles", "Predicted Energy Generation (W)")
 
 
 class PageAgentInfo(tk.Frame):
@@ -219,7 +246,7 @@ class PageAgentInfo(tk.Frame):
                     new_active_agent.pack(fill=tk.X)
             except:
                 return
-        # self.after(500, lambda: self.display_active_agents(multiagent_system))
+        self.after(500, lambda: self.display_active_agents(multiagent_system))
 
 
 if __name__ == "__main__":
