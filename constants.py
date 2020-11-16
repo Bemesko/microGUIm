@@ -7,7 +7,7 @@ START_PRICE = "starting_price"
 INCREMENT = "increment"
 MIN_PRICE = "min_price"
 MAX_LOT_SIZE = "max_lot_size_wh"
-NAMESERVER_AGENT_AMOUNT = 5
+NAMESERVER_AGENT_AMOUNT = 7
 ATTRIBUTE_LIST_LENGTH = 10
 
 NEXT_ENERGY_CONSUMPTION = "next_energy_consumption"

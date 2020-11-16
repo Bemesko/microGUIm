@@ -149,23 +149,6 @@ class Prosumer(Agent):
 class MultiagentSystem():
 
     def __init__(self):
-        self.agent_attributes = {
-            constants.NEXT_ENERGY_CONSUMPTION: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
-                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
-            constants.NEXT_ENERGY_GENERATION: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
-                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
-            constants.ENERGY_DIFFERENCE: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
-                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
-            constants.ENERGY_MARKET_PRICE: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
-                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
-            constants.ENERGY_BUY_STARTING_PRICE: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
-                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
-            constants.ENERGY_BUY_PRICE_INCREMENT: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
-                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]],
-            constants.ENERGY_SELL_MIN_PRICE: [[35, 23, 78, 12], [12, 54, 23, 65, 34], [
-                23, 54, 63, 12, 75], [23, 65, 23, 65, 23], [23, 75, 13, 74, 61]]
-        }
-
         '''Agent Setup'''
         # Setting up nameserver
         self.nameserver = run_nameserver()
@@ -197,6 +180,16 @@ class MultiagentSystem():
         for new_prosumer in self.prosumers:
             new_prosumer.connect(
                 marketPriceAddr, handler=Prosumer.get_market_prices)
+
+        self.agent_attributes = {
+            constants.NEXT_ENERGY_CONSUMPTION: [[] for agent in self.prosumers],
+            constants.NEXT_ENERGY_GENERATION: [[] for agent in self.prosumers],
+            constants.ENERGY_DIFFERENCE: [[] for agent in self.prosumers],
+            constants.ENERGY_MARKET_PRICE: [[] for agent in self.prosumers],
+            constants.ENERGY_BUY_STARTING_PRICE: [[] for agent in self.prosumers],
+            constants.ENERGY_BUY_PRICE_INCREMENT: [[] for agent in self.prosumers],
+            constants.ENERGY_SELL_MIN_PRICE: [[] for agent in self.prosumers]
+        }
 
     def run_auction_script(self):
         self.auction_sync_agent.each(5, AuctionSync.send_market_prices)

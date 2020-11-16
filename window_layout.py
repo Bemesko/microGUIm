@@ -127,7 +127,7 @@ class PageGraph(tk.Frame):
         self.multiagent_system = multiagent_system
 
         # the figure that will contain the plot
-        self.graph_figure = Figure(figsize=(5, 5),
+        self.graph_figure = Figure(figsize=(10, 7),
                                    dpi=100)
 
         # creating the Tkinter canvas
@@ -150,14 +150,16 @@ class PageGraph(tk.Frame):
 
         self.graph_figure.clear()
 
-        self.graph_figure.legend()
-
         # adding the subplot
         self.plot1 = self.graph_figure.add_subplot()
 
+        agent_i = 0
         # plotting the graph
         for attributes in self.multiagent_system.agent_attributes[constants.NEXT_ENERGY_CONSUMPTION]:
-            self.plot1.plot(attributes)
+            self.plot1.plot(attributes, label=f"Prosumer{agent_i}")
+            self.plot1.legend(
+                loc='upper left', borderaxespad=0.)
+            agent_i += 1
 
         self.canvas.draw()
 
