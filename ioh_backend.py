@@ -14,11 +14,13 @@ class AuctionSync(Agent):
         self.seller_agents = []
 
         # ter uma lista aqui com todos os caras a partir do nameserver
+        self.prosumers = []
 
     def generate_market_prices(self):
         self.current_market_prices = random.randrange(1, 100)
 
     def send_market_prices(self):
+        self.generate_market_prices()
         self.send('marketPrices', self.current_market_prices)
         self.log_info(
             f"Market prices sent! Current price: {self.current_market_prices}")
@@ -191,6 +193,8 @@ class MultiagentSystem():
         for i in range(self.agent_amount):
             agent_name = f"prosumer_{i}"
             self.prosumers.append(run_agent(agent_name, base=Prosumer))
+
+        self.auction_sync_agent.set_attr(prosumers=self.prosumers)
 
         '''Communications Setup'''
         # Sell request set up

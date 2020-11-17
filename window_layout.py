@@ -88,7 +88,6 @@ class tkinterApp(tk.Tk):
             frame = new_frame(self.frame_middle, self, self.mas)
 
             self.frames[new_frame] = frame
-            print(frame.is_visible)
 
             frame.grid(row=0, column=0, sticky="nswe", padx=15, pady=15)
 
@@ -99,9 +98,7 @@ class tkinterApp(tk.Tk):
         frame = self.frames[desired_frame]
         frame.is_visible = True
         frame.tkraise()
-        print(self.last_frame.is_visible)
         self.last_frame = frame
-        print(frame.is_visible)
 
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Are you sure you want to quit?"):
