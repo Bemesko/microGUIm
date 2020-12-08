@@ -1,8 +1,8 @@
 from tkinter import messagebox
 from tkinter import ttk
 import tkinter as tk
-import ioh_backend
-import constants
+import Packages.ioh_backend as ioh_backend
+import Packages.constants as constants
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib

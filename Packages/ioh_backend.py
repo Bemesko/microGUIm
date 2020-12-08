@@ -1,7 +1,6 @@
 import random
 import time
-import enum
-import constants
+import Packages.constants as constants
 
 
 from osbrain import Agent, run_agent, run_nameserver
