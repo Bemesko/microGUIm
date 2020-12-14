@@ -41,13 +41,13 @@ class tkinterApp(tk.Tk):
             self.frame_buttons, text="Next Generation", command=lambda: self.show_frame(PageGraphNextGeneration))
         self.button_graph_next_generation.grid(sticky="we")
 
-        self.button_graph_market_price = tk.Button(
-            self.frame_buttons, text="Market Prices", command=lambda: self.show_frame(PageGraphMarket))
-        self.button_graph_market_price.grid(sticky="we")
-
         self.button_graph_wanted_energy = tk.Button(
             self.frame_buttons, text="Wanted Energy", command=lambda: self.show_frame(PageGraphWanted))
         self.button_graph_wanted_energy.grid(sticky="we")
+
+        self.button_graph_market_price = tk.Button(
+            self.frame_buttons, text="Market Prices", command=lambda: self.show_frame(PageGraphMarket))
+        self.button_graph_market_price.grid(sticky="we")
 
         self.button_graph_max_price = tk.Button(
             self.frame_buttons, text="Highest Bid to Buy", command=lambda: self.show_frame(PageGraphMaxPrice))
